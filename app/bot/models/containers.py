@@ -10,11 +10,7 @@ if TYPE_CHECKING:
     from app.bot.middlewares import I18nMiddleware
     from app.bot.services import MaintenanceService, NotificationService
     from app.core.config import AppConfig
-    from app.db.crud import (
-        UserService,
-        PromocodeService,
-        PlanService,
-    )
+    from app.db.crud import UserService, PromocodeService, PlanService, NotificationSettingsService
 
 from dataclasses import dataclass
 
@@ -27,6 +23,7 @@ class ServicesContainer:
     user: UserService
     plan: PlanService
     promocode: PromocodeService
+    notification_settings: NotificationSettingsService
 
 
 @dataclass

@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 from typing import Optional
 
 from app.core.enums import Currency, PlanAvailability, PlanType
 
 from .base import TrackableModel
+from .timestamp import TimestampSchema
 
 
 class PlanSchema(TrackableModel):
@@ -18,10 +19,8 @@ class PlanSchema(TrackableModel):
     allowed_user_ids: Optional[list[int]] = None
 
 
-class PlanDto(PlanSchema):
+class PlanDto(PlanSchema, TimestampSchema):
     id: int
-    created_at: datetime
-    updated_at: datetime
 
     @property
     def is_unlimited_traffic(self) -> bool:

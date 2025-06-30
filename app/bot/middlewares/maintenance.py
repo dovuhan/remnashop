@@ -38,12 +38,18 @@ class MaintenanceMiddleware(EventTypedMiddleware):
 
         if await maintenance_service.is_global_mode():
             self.logger.info(f"{format_log_user(user)} Access denied (global)")
-            # TODO: Notify user about maintenance
+            await container.services.notification.notify_user(
+                telegram_id=user.telegram_id,
+                text_key="ntf-maintenance-denied-global",
+            )
             return
 
         if await maintenance_service.is_purchase_mode() and self._is_purchase_action(event):
             self.logger.warning(f"{format_log_user(user)} Access denied (purchase)")
-            # TODO: Notify user about maintenance
+            await container.services.notification.notify_user(
+                telegram_id=user.telegram_id,
+                text_key="ntf-maintenance-denied-purchase",
+            )
 
             if await maintenance_service.should_notify_user(user.telegram_id):
                 await maintenance_service.register_waiting_user(user.telegram_id)

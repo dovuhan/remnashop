@@ -4,7 +4,7 @@ from pydantic import ValidationError
 
 from app.bot.models.containers import AppContainer
 from app.core.config import AppConfig
-from app.core.enums import MaintenanceMode, UserRole
+from app.core.enums import MaintenanceMode, SystemNotificationType
 from app.core.logger import setup_logging
 
 config = AppConfig.get()
@@ -35,6 +35,7 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     bot: Bot = create_bot(token=config.bot.token.get_secret_value())
     dispatcher: Dispatcher = create_dispatcher(bot, config)
     container: AppContainer = dispatcher.workflow_data[APP_CONTAINER_KEY]
+    await container.services.notification_settings.get_or_create()
     notification = container.services.notification
     maintenance = container.services.maintenance
 
@@ -48,16 +49,17 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     if mode != MaintenanceMode.OFF:
         logger.warning(f"Bot in maintenance mode: '{mode}'")
 
-    await notification.notify_by_role(
-        role=UserRole.DEV,
+    await notification.system_notify(
+        notification_type=SystemNotificationType.BOT_LIFETIME,
         text_key="ntf-event-bot-startup",
         mode=mode,
     )
 
+    logger.info("Bot started successfully")
     yield
 
-    await notification.notify_by_role(
-        role=UserRole.DEV,
+    await notification.system_notify(
+        notification_type=SystemNotificationType.BOT_LIFETIME,
         text_key="ntf-event-bot-shutdown",
     )
 

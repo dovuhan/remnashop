@@ -8,7 +8,12 @@ from app.bot.middlewares import I18nMiddleware
 from app.bot.models import ServicesContainer
 from app.bot.services import MaintenanceService, NotificationService
 from app.core.config import AppConfig
-from app.db.crud import PlanService, PromocodeService, UserService
+from app.db.crud import (
+    NotificationSettingsService,
+    PlanService,
+    PromocodeService,
+    UserService,
+)
 
 
 def create_services(
@@ -26,9 +31,16 @@ def create_services(
     user_service = UserService(**crud_service_kwargs)
     plan_service = PlanService(**crud_service_kwargs)
     promocode_service = PromocodeService(**crud_service_kwargs)
+    notification_settings_service = NotificationSettingsService(**crud_service_kwargs)
 
     maintenance_service = MaintenanceService(redis)
-    notification_service = NotificationService(bot, config, i18n, user_service)
+    notification_service = NotificationService(
+        bot,
+        config,
+        i18n,
+        user_service,
+        notification_settings_service,
+    )
 
     return ServicesContainer(
         maintenance=maintenance_service,
@@ -36,4 +48,5 @@ def create_services(
         user=user_service,
         plan=plan_service,
         promocode=promocode_service,
+        notification_settings=notification_settings_service,
     )

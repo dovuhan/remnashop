@@ -2,13 +2,17 @@ from aiogram_dialog import Dialog, StartMode, Window
 from aiogram_dialog.widgets.kbd import Button, ListGroup, Row, Start, SwitchTo
 from aiogram_dialog.widgets.text import Format
 
-from app.bot.routers.dashboard.users.handlers import on_user_selected
-from app.bot.states import Dashboard, DashboardRemnashop, RemnashopPlans
+from app.bot.states import (
+    Dashboard,
+    DashboardRemnashop,
+    RemnashopNotifications,
+    RemnashopPlans,
+)
 from app.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from app.core.enums import BannerName
 
 from .getters import admins_getter
-from .handlers import on_user_role_removed
+from .handlers import on_user_role_removed, on_user_selected
 
 remnashop = Window(
     Banner(BannerName.DASHBOARD),
@@ -39,10 +43,10 @@ remnashop = Window(
             state=RemnashopPlans.MAIN,
             mode=StartMode.RESET_STACK,
         ),
-        SwitchTo(
+        Start(
             text=I18nFormat("btn-remnashop-notifications"),
             id="notifications",
-            state=DashboardRemnashop.NOTIFICATIONS,
+            state=RemnashopNotifications.MAIN,
         ),
     ),
     Row(
@@ -70,7 +74,7 @@ remnashop = Window(
 
 admins = Window(
     Banner(BannerName.DASHBOARD),
-    I18nFormat("msg-remnashop-admins"),
+    I18nFormat("msg-admins-main"),
     ListGroup(
         Row(
             Button(

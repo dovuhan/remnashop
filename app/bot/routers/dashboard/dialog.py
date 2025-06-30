@@ -3,7 +3,6 @@ from aiogram_dialog.widgets.kbd import Button, Column, Row, Select, Start, Switc
 from magic_filter import F
 
 from app.bot.conditions import is_dev
-from app.bot.routers.dashboard.getters import maintenance_getter
 from app.bot.states import (
     Dashboard,
     DashboardBroadcast,
@@ -15,6 +14,7 @@ from app.bot.states import (
 from app.bot.widgets import Banner, I18nFormat, IgnoreUpdate
 from app.core.enums import BannerName, MaintenanceMode
 
+from .getters import maintenance_getter
 from .handlers import on_maintenance_mode_selected
 from .remnawave.handlers import start_remnawave_window
 

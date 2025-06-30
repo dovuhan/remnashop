@@ -5,7 +5,7 @@ from aiogram.types import User as AiogramUser
 
 from app.bot.models import AppContainer
 from app.core.constants import APP_CONTAINER_KEY, USER_KEY
-from app.core.enums import MiddlewareEventType, UserRole
+from app.core.enums import MiddlewareEventType, SystemNotificationType, UserRole
 from app.core.formatters import format_log_user
 from app.db.models.dto import UserDto, UserSchema
 
@@ -33,6 +33,7 @@ class UserMiddleware(EventTypedMiddleware):
         container: AppContainer = data[APP_CONTAINER_KEY]
         user_service = container.services.user
         user: Optional[UserDto] = await user_service.get(telegram_id=aiogram_user.id)
+        # TODO: Cache the last 10 users interacted with the bot
 
         if user is None:
             user_data = UserSchema(
@@ -51,7 +52,12 @@ class UserMiddleware(EventTypedMiddleware):
             )
             user = await user_service.create(user_data)
             self.logger.info(f"{format_log_user(user)} Created new user")
-            # TODO: Notify devs
+            await container.services.notification.system_notify(
+                SystemNotificationType.USER_REGISTERED,
+                text_key="ntf-event-new-user",
+                id=user.telegram_id,
+                name=user.name,
+            )
 
         if user.is_bot_blocked:
             self.logger.info(f"{format_log_user(user)} Bot unblocked")

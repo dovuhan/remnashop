@@ -183,7 +183,7 @@ msg-remnawave-inbounds =
 
 # RemnaShop
 msg-remnashop-main = <b>🛍 RemnaShop</b>
-msg-remnashop-admins = <b>👮‍♂️ Администраторы</b>
+msg-admins-main = <b>👮‍♂️ Администраторы</b>
 
 
 # Plans
@@ -206,7 +206,7 @@ msg-plan-config =
         [invited] Для приглашенных
         *[allowed] Для разрешенных
         }
-    Статус: { $active -> 
+    Статус: { $is_active -> 
         [1] 🟢 Включен
         *[0] 🔴 Выключен
         }
@@ -292,3 +292,8 @@ msg-plan-price =
     })</b>
 
     Введите новую цену для валюты { $currency }
+
+# Notifications
+msg-notifications-main = <b>🔔 Настройка уведомлений</b>
+msg-notifications-user = <b>👥 Пользовательские уведомления</b>
+msg-notifications-system = <b>⚙️ Системные уведомления</b>

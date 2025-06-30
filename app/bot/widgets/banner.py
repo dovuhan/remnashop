@@ -24,7 +24,7 @@ class Banner(StaticMedia):
             if candidate_path.exists():
                 path = candidate_path
                 content_type = format.content_type
-                logger.debug(f"Using banner file: {path} with content type: {content_type}")
+                logger.debug(f"Using banner file: '{path}' with content type: '{content_type}'")
                 break
 
         if path is None:
@@ -33,7 +33,7 @@ class Banner(StaticMedia):
             content_type = BannerFormat.JPG.content_type
 
         if not path.exists():
-            raise FileNotFoundError(f"Default banner file not found: {path}")
+            raise FileNotFoundError(f"Default banner file not found: '{path}'")
 
         def is_use_banners(data: dict, widget: Whenable, dialog_manager: DialogManager) -> bool:
             container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]

@@ -9,9 +9,10 @@ from aiogram_dialog.widgets.kbd import Button, Select
 from app.bot.models import AppContainer
 from app.bot.states import RemnashopPlans
 from app.core.adapter import DialogDataAdapter
-from app.core.constants import APP_CONTAINER_KEY
+from app.core.constants import APP_CONTAINER_KEY, USER_KEY
 from app.core.enums import Currency, PlanAvailability, PlanType
 from app.db.models.dto import PlanDurationSchema, PlanPriceSchema, PlanSchema
+from app.db.models.dto.user import UserDto
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,14 @@ async def on_name_input(
     dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
 
     if message.text is None:
-        # TODO: Notify wrong name
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-name",
+        )
         return
 
     # TODO: Check the availability of a plan with that name
@@ -80,14 +86,28 @@ async def on_traffic_input(
     dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
 
     if message.text is None or not message.text.isdigit():
-        # Notify wrong name
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-number",
+        )
+        return
+
+    number = int(message.text)
+
+    if number <= 0:
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-negative-number",
+        )
         return
 
     adapter = DialogDataAdapter(dialog_manager)
     plan = adapter.load(PlanSchema)
-    plan.traffic_limit = int(message.text)
+    plan.traffic_limit = number
     adapter.save(plan)
 
     await dialog_manager.switch_to(state=RemnashopPlans.PLAN)
@@ -99,14 +119,28 @@ async def on_devices_input(
     dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
 
     if message.text is None or not message.text.isdigit():
-        # Notify wrong name
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-number",
+        )
+        return
+
+    number = int(message.text)
+
+    if number <= 0:
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-negative-number",
+        )
         return
 
     adapter = DialogDataAdapter(dialog_manager)
     plan = adapter.load(PlanSchema)
-    plan.device_limit = int(message.text)
+    plan.device_limit = number
     adapter.save(plan)
 
     await dialog_manager.switch_to(state=RemnashopPlans.PLAN)
@@ -143,16 +177,30 @@ async def on_duration_input(
     dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
 
     if message.text is None or not message.text.isdigit():
-        # Notify wrong name
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-number",
+        )
+        return
+
+    number = int(message.text)
+
+    if number <= 0:
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-negative-number",
+        )
         return
 
     adapter = DialogDataAdapter(dialog_manager)
     plan = adapter.load(PlanSchema)
     plan.durations.append(
         PlanDurationSchema(
-            days=int(message.text),
+            days=number,
             prices=[
                 PlanPriceSchema(
                     currency=currency,
@@ -182,16 +230,25 @@ async def on_price_input(
     dialog_manager: DialogManager,
 ) -> None:
     dialog_manager.show_mode = ShowMode.EDIT
+    user: UserDto = dialog_manager.middleware_data[USER_KEY]
+    container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
 
     if message.text is None:
-        # Notify wrong price
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-number",
+        )
         return
 
     try:
-        # TODO: XTR - only int (currency_selected)
         new_price = Decimal(message.text)
+        if new_price <= 0:
+            raise InvalidOperation
     except InvalidOperation:
-        # Notify incorrect number
+        await container.services.notification.notify_user(
+            telegram_id=user.telegram_id,
+            text_key="ntf-plan-wrong-number",
+        )
         return
 
     adapter = DialogDataAdapter(dialog_manager)
@@ -199,6 +256,9 @@ async def on_price_input(
 
     duration_selected = dialog_manager.dialog_data.get("duration_selected")
     currency_selected = dialog_manager.dialog_data.get("currency_selected")
+
+    if currency_selected == Currency.XTR:
+        new_price = new_price.quantize(Decimal(0))
 
     for duration in plan.durations:
         if duration.days == duration_selected:

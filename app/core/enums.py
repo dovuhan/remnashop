@@ -1,6 +1,17 @@
 from enum import Enum, StrEnum, auto
+from typing import Any, Callable
 
+from aiogram import Bot
 from aiogram.types import BotCommand, ContentType
+
+
+class MessageEffect(StrEnum):
+    FIRE = "5104841245755180586"
+    LIKE = "5107584321108051014"
+    DISLIKE = "5104858069142078462"
+    LOVE = "5044134455711629726"
+    CONFETTI = "5046509860389126442"
+    POOP = "5046589136895476101"
 
 
 class ByteUnit(StrEnum):
@@ -16,6 +27,19 @@ class TimeUnit(StrEnum):
     MINUTE = "unit-minutes"
     HOUR = "unit-hours"
     DAY = "unit-days"
+
+
+class SystemNotificationType(StrEnum):
+    BOT_LIFETIME = auto()
+    USER_REGISTERED = auto()
+    SUBSCRIPTION = auto()
+    PROMOCODE_ACTIVATED = auto()
+    # TODO: TORRENT_BLOCK
+    # TODO: TRAFFIC_OVERUSE
+
+
+class UserNotificationType(StrEnum):
+    pass
 
 
 class BannerFormat(StrEnum):
@@ -40,6 +64,15 @@ class MediaType(StrEnum):
     PHOTO = ContentType.PHOTO
     VIDEO = ContentType.VIDEO
     DOCUMENT = ContentType.DOCUMENT
+
+    def get_function(self, bot_instance: Bot) -> Callable[..., Any]:
+        match self:
+            case MediaType.PHOTO:
+                return bot_instance.send_photo
+            case MediaType.VIDEO:
+                return bot_instance.send_video
+            case MediaType.DOCUMENT:
+                return bot_instance.send_document
 
 
 class BannerName(StrEnum):

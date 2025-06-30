@@ -3,7 +3,6 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import (
     Button,
     Column,
-    Group,
     ListGroup,
     Row,
     Select,
@@ -89,7 +88,7 @@ plan_config = Window(
             state=RemnashopPlans.AVAILABILITY,
         ),
         Button(
-            text=I18nFormat("btn-plan-active", is_active=F["active"]),
+            text=I18nFormat("btn-plan-active", is_active=F["is_active"]),
             id="active_toggle",
             on_click=on_active_toggle,
         ),

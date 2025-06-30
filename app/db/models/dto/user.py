@@ -3,6 +3,7 @@ from datetime import datetime
 from app.core.enums import UserRole
 
 from .base import TrackableModel
+from .timestamp import TimestampSchema
 
 
 class UserSchema(TrackableModel):
@@ -20,11 +21,8 @@ class UserSchema(TrackableModel):
     is_trial_used: bool = False
 
 
-class UserDto(UserSchema):
+class UserDto(UserSchema, TimestampSchema):
     id: int
-
-    created_at: datetime
-    updated_at: datetime
 
     @property
     def is_dev(self) -> bool:

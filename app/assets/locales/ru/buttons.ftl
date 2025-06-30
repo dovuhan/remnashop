@@ -83,6 +83,30 @@ btn-remnashop-notifications = 🔔 Уведомления
 btn-remnashop-logs = 📄 Логи
 btn-remnashop-audit = 🔍 Аудит
 
+# Notifications
+btn-notifications-user = 👥 Пользовательские
+
+btn-notifications-user-choice = { $enabled ->
+    [1] 🔘
+    *[0] ⚪
+    } { $type ->
+    [type] type
+    [type] type
+    [type] type
+    *[type] type
+    }
+
+btn-notifications-system = ⚙️ Системные
+
+btn-notifications-system-choice = { $enabled -> 
+    [1] 🔘
+    *[0] ⚪
+    } { $type ->
+    [bot_lifetime] Жизненный цикл бота
+    [user_registered] Регистрация пользователя
+    [subscription] Оформление подписки
+    *[promocode_activated] Активация промокода
+    }
 
 # Plans
 btn-plans-statistics = 📊 Статистика
@@ -91,7 +115,7 @@ btn-plan-confirm = ✅ Подтвердить
 btn-plan-name = 🏷️ Имя
 btn-plan-type = 🔖 Тип
 btn-plan-availability = ✴️ Доступ
-btn-plan-active = { $active -> 
+btn-plan-active = { $is_active -> 
     [1] 🟢
     *[0] 🔴
     } Статус

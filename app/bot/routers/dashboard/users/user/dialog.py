@@ -41,7 +41,7 @@ user = Window(
     ),
     Row(
         Button(
-            text=I18nFormat("btn-user-block", is_blocked=F["{is_blocked}"]),
+            text=I18nFormat("btn-user-block", is_blocked=F["is_blocked"]),
             id="block",
             on_click=on_block_toggle,
         ),

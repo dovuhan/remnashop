@@ -10,6 +10,8 @@ from aiogram.types import User as AiogramUser
 from aiogram.utils.formatting import Bold, Text
 from aiogram_dialog.api.exceptions import UnknownState
 
+from app.bot.models.containers import AppContainer
+from app.core.constants import APP_CONTAINER_KEY
 from app.core.enums import MiddlewareEventType
 
 from .base import EventTypedMiddleware
@@ -25,10 +27,12 @@ class ErrorMiddleware(EventTypedMiddleware):
         data: dict[str, Any],
     ) -> Any:
         aiogram_user: Optional[AiogramUser] = self._get_aiogram_user(event)
+        container: AppContainer = data[APP_CONTAINER_KEY]
+        user = container.services.user.get(telegram_id=aiogram_user.id)
 
         if isinstance(event.exception, TelegramForbiddenError):
             self.logger.info(f"[User:{aiogram_user.id} ({aiogram_user.full_name})] Blocked the bot")
-            # TODO: handle user.is_bot_blocked
+            await container.services.user.set_bot_blocked(user, blocked=True)
         elif isinstance(event.exception, TelegramBadRequest):
             self.logger.warning(f"[User:{aiogram_user.id} ({aiogram_user.full_name})] Bad request")
         elif isinstance(event.exception, TelegramNotFound):
@@ -44,7 +48,7 @@ class ErrorMiddleware(EventTypedMiddleware):
             text = Text(
                 Bold((type(event.exception).__name__)), f": {str(event.exception)[:1021]}..."
             )
-            # TODO: Send error details to developer
+            await container.services.notification.notify_super_dev(text_key=text)
 
         except TelegramBadRequest as exception:
             self.logger.warning(f"Failed to send error details: {exception}")

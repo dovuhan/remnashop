@@ -55,8 +55,13 @@ class DashboardRemnashop(StatesGroup):
     ADMINS = State()
     REFERRAL = State()
     ADVERTISING = State()
-    NOTIFICATIONS = State()
     LOGS = State()
+
+
+class RemnashopNotifications(StatesGroup):
+    MAIN = State()
+    USER = State()
+    SYSTEM = State()
 
 
 class RemnashopPlans(StatesGroup):

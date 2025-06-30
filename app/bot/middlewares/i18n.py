@@ -56,7 +56,8 @@ class I18nMiddleware(EventTypedMiddleware):
             target_locale = self.default_locale
 
         if locale is not None:
-            self.logger.debug(f"Using explicitly provided locale: '{target_locale}'")
+            # self.logger.debug(f"Using explicitly provided locale: '{target_locale}'")
+            pass
         elif user is not None:
             if user.language in self.locales:
                 # self.logger.debug(f"{format_log_user(user)} Using locale: '{target_locale}'")

@@ -4,6 +4,7 @@ from typing import Optional
 from app.core.enums import PromocodeType
 
 from .base import TrackableModel
+from .timestamp import TimestampSchema
 
 
 class PromocodeSchema(TrackableModel):
@@ -21,11 +22,8 @@ class PromocodeSchema(TrackableModel):
     activated_by: Optional[int] = None
 
 
-class PromocodeDto(PromocodeSchema):
+class PromocodeDto(PromocodeSchema, TimestampSchema):
     id: int
-
-    created_at: datetime
-    updated_at: datetime
 
     @property
     def is_redeemed(self) -> bool:

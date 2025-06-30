@@ -16,4 +16,4 @@ RUN poetry config virtualenvs.create false \
 
 EXPOSE 5000
 
-CMD ["sh", "-c", "alembic -c app/db/alembic.ini upgrade head && exec uvicorn app.__main__:app --host 0.0.0.0 --port 5000 --reload --reload-dir /opt/remnashop/app --reload-include '*.ftl'"]
+CMD ["sh", "-c", "alembic -c app/db/alembic.ini upgrade head && exec uvicorn app.__main__:app --host 0.0.0.0 --port 5000 --log-level critical --reload --reload-dir /opt/remnashop/app --reload-include '*.ftl'"]

@@ -7,6 +7,7 @@ from aiogram_dialog import DialogManager, ShowMode, StartMode
 from aiogram_dialog.api.exceptions import UnknownState
 
 from app.bot.middlewares.i18n import I18nFormatter
+from app.bot.models.containers import AppContainer
 from app.bot.states import MainMenu
 from app.core.formatters import format_log_user
 from app.db.models import UserDto
@@ -34,13 +35,17 @@ async def on_start_command(
 async def on_unknown_state(
     event: ErrorEvent,
     message: Message,
+    user: UserDto,
     dialog_manager: DialogManager,
     i18n_formatter: I18nFormatter,
-    user: UserDto,
+    container: AppContainer,
 ) -> None:
     logger.warning(f"{format_log_user(user)} Restarting dialog")
 
-    await message.answer(i18n_formatter("ntf-error-unknown-state"))  # TODO: notification service
+    await container.services.notification.notify_user(
+        telegram_id=user.telegram_id,
+        text_key="ntf-error-unknown-state",
+    )
     await on_start_command(message=message, user=user, dialog_manager=dialog_manager)
 
 
