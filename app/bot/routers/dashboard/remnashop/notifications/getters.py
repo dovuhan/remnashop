@@ -33,7 +33,7 @@ async def user_types_getter(
     container: AppContainer,
     **kwargs: Any,
 ) -> dict[str, Any]:
-    settings = await container.redis_repository.get_user_notification_settings()
+    settings = await container.services.notification.get_user_settings()
     notification_types_data = await _get_notification_types_data(settings, UserNotificationType)
     return {"types": notification_types_data}
 
@@ -43,6 +43,6 @@ async def system_types_getter(
     container: AppContainer,
     **kwargs: Any,
 ) -> dict[str, Any]:
-    settings = await container.redis_repository.get_system_notification_settings()
+    settings = await container.services.notification.get_system_settings()
     notification_types_data = await _get_notification_types_data(settings, SystemNotificationType)
     return {"types": notification_types_data}

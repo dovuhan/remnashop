@@ -20,3 +20,11 @@ class SystemNotificationSettingsKey(StorageKey, prefix="system_notification_sett
 
 class UserNotificationSettingsKey(StorageKey, prefix="user_notification_settings"):
     pass
+
+
+class RecentRegisteredUsersKey(StorageKey, prefix="recent_registered_users"):
+    pass
+
+
+class RecentActivityUsersKey(StorageKey, prefix="recent_activity_users"):
+    pass

@@ -23,6 +23,24 @@ async def search_results_getter(
     }
 
 
+async def recent_registered_getter(
+    dialog_manager: DialogManager,
+    container: AppContainer,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    users = await container.services.user.get_recent_registered_users()
+    return {"recent_registered_users": users}
+
+
+async def recent_activity_getter(
+    dialog_manager: DialogManager,
+    container: AppContainer,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    users = await container.services.user.get_recent_activity_users()
+    return {"recent_activity_users": users}
+
+
 async def blacklist_getter(
     dialog_manager: DialogManager,
     container: AppContainer,

@@ -5,14 +5,9 @@ from redis.asyncio import Redis
 from redis.typing import ExpiryT
 
 from app.core.config import AppConfig
-from app.core.storage_keys import (
-    SystemNotificationSettingsKey,
-    UserNotificationSettingsKey,
-    WebhookLockKey,
-)
+from app.core.storage_keys import WebhookLockKey
 from app.core.utils import mjson
 from app.core.utils.key_builder import StorageKey
-from app.db.models.dto import SystemNotificationDto, UserNotificationDto
 
 T = TypeVar("T", bound=Any)
 
@@ -53,6 +48,8 @@ class RedisRepository:
     async def close(self) -> None:
         await self.client.aclose(close_connection_pool=True)
 
+    #
+
     async def collection_add(self, key: StorageKey, *values: Any) -> int:
         str_values = [str(v) for v in values]
         return await cast(Awaitable[int], self.client.sadd(key.pack(), *str_values))
@@ -67,6 +64,40 @@ class RedisRepository:
     async def collection_remove(self, key: StorageKey, *values: Any) -> int:
         str_values = [str(v) for v in values]
         return await cast(Awaitable[int], self.client.srem(key.pack(), *str_values))
+
+    #
+
+    async def list_push(self, key: StorageKey, *values: Any) -> int:
+        str_values = [str(v) for v in values]
+        return await cast(Awaitable[int], self.client.lpush(key.pack(), *str_values))
+
+    async def list_remove(self, key: StorageKey, value: Any, count: int = 0) -> int:
+        return await cast(Awaitable[int], self.client.lrem(key.pack(), count, str(value)))
+
+    async def list_range(self, key: StorageKey, start: int, end: int) -> list[str]:
+        items_bytes = await cast(Awaitable[list[bytes]], self.client.lrange(key.pack(), start, end))
+        return [item.decode() for item in items_bytes]
+
+    async def list_trim(self, key: StorageKey, start: int, end: int) -> None:
+        await cast(Awaitable[str], self.client.ltrim(key.pack(), start, end))
+
+    #
+
+    async def sorted_collection_add(self, key: StorageKey, mapping: dict[Any, float]) -> int:
+        str_mapping = {str(k): v for k, v in mapping.items()}
+        return await cast(Awaitable[int], self.client.zadd(key.pack(), str_mapping))
+
+    async def sorted_collection_revrange(self, key: StorageKey, start: int, end: int) -> list[str]:
+        items_bytes = await cast(
+            Awaitable[list[bytes]], self.client.zrevrange(key.pack(), start, end)
+        )
+        return [item.decode() for item in items_bytes]
+
+    async def sorted_collection_remove(self, key: StorageKey, *values: Any) -> int:
+        str_values = [str(v) for v in values]
+        return await cast(Awaitable[int], self.client.zrem(key.pack(), *str_values))
+
+    #
 
     async def is_webhook_set(self, bot_id: int, webhook_hash: str) -> bool:
         key: WebhookLockKey = WebhookLockKey(
@@ -88,25 +119,3 @@ class RedisRepository:
         if not keys:
             return
         await self.client.delete(*keys)
-
-    async def get_system_notification_settings(self) -> SystemNotificationDto:
-        key = SystemNotificationSettingsKey()
-        settings = await self.get(
-            key=key, validator=SystemNotificationDto, default=SystemNotificationDto()
-        )
-        return cast(SystemNotificationDto, settings)
-
-    async def set_system_notification_settings(self, data: SystemNotificationDto) -> None:
-        key = SystemNotificationSettingsKey()
-        await self.set(key=key, value=data)
-
-    async def get_user_notification_settings(self) -> UserNotificationDto:
-        key = UserNotificationSettingsKey()
-        settings = await self.get(
-            key=key, validator=UserNotificationDto, default=UserNotificationDto()
-        )
-        return cast(UserNotificationDto, settings)
-
-    async def set_user_notification_settings(self, data: UserNotificationDto) -> None:
-        key = UserNotificationSettingsKey()
-        await self.set(key=key, value=data)

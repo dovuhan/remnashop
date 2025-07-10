@@ -13,6 +13,37 @@ from .base import BaseService
 
 
 class MaintenanceService(BaseService):
+    async def check_access(
+        self,
+        user: UserDto,
+        event: TelegramObject,
+    ) -> bool:
+        if not await self.is_active():
+            logger.debug(f"{format_log_user(user)} Access allowed (maintenance not active)")
+            return True
+
+        if user.is_privileged:
+            logger.debug(f"{format_log_user(user)} Access allowed (privileged user)")
+            return True
+
+        if await self.is_global_mode():
+            logger.info(f"{format_log_user(user)} Access denied (global maintenance mode)")
+            return False
+
+        if await self.is_purchase_mode() and self._is_purchase_action(event):
+            logger.info(f"{format_log_user(user)} Access denied (purchase maintenance mode)")
+
+            if await self.should_user_be_notified(user.telegram_id):
+                await self.add_user_to_waitlist(user.telegram_id)
+                logger.debug(
+                    f"{format_log_user(user)} Added to waiting list for maintenance notification"
+                )
+
+            return False
+
+        logger.debug(f"{format_log_user(user)} Access allowed (no specific denial condition met)")
+        return True
+
     async def get_current_mode(self) -> MaintenanceMode:
         key = MaintenanceModeKey()
         mode = await self.redis_repository.get(
@@ -86,38 +117,7 @@ class MaintenanceService(BaseService):
         await self.redis_repository.delete(key=MaintenanceWaitListKey())
         logger.info("User waiting list completely cleared")
 
-    def is_purchase_action(self, event: TelegramObject) -> bool:
+    def _is_purchase_action(self, event: TelegramObject) -> bool:
         # TODO: Find purchase action
         # callback_data = remove_intent_id(event.data)
         return False  # Placeholder
-
-    async def check_access(
-        self,
-        user: UserDto,
-        event: TelegramObject,
-    ) -> bool:
-        if not await self.is_active():
-            logger.debug(f"{format_log_user(user)} Access allowed (maintenance not active)")
-            return True
-
-        if user.is_privileged:
-            logger.debug(f"{format_log_user(user)} Access allowed (privileged user)")
-            return True
-
-        if await self.is_global_mode():
-            logger.info(f"{format_log_user(user)} Access denied (global maintenance mode)")
-            return False
-
-        if await self.is_purchase_mode() and self.is_purchase_action(event):
-            logger.info(f"{format_log_user(user)} Access denied (purchase maintenance mode)")
-
-            if await self.should_user_be_notified(user.telegram_id):
-                await self.add_user_to_waitlist(user.telegram_id)
-                logger.debug(
-                    f"{format_log_user(user)} Added to waiting list for maintenance notification"
-                )
-
-            return False
-
-        logger.debug(f"{format_log_user(user)} Access allowed (no specific denial condition met)")
-        return True

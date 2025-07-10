@@ -27,7 +27,7 @@ async def on_logs_requested(
 
     try:
         file = FSInputFile(
-            path=f"{LOG_DIR}/{LOG_FILENAME}",
+            path=LOG_DIR / LOG_FILENAME,
             filename=f"{datetime_now().strftime('%Y-%m-%d_%H-%M-%S')}.log",
         )
     except FileNotFoundError:

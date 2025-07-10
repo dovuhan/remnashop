@@ -19,7 +19,7 @@ async def on_user_type_selected(
     container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
     notification = container.services.notification
-    settings = await container.redis_repository.get_user_notification_settings()
+    settings = await container.services.notification.get_user_settings()
     # TODO: UserNotificationType
 
 
@@ -31,10 +31,10 @@ async def on_system_type_selected(
 ) -> None:
     container: AppContainer = dialog_manager.middleware_data[APP_CONTAINER_KEY]
     user: UserDto = dialog_manager.middleware_data[USER_KEY]
-    settings = await container.redis_repository.get_system_notification_settings()
+    settings = await container.services.notification.get_system_settings()
 
     setattr(settings, selected_type, not getattr(settings, selected_type))
-    await container.redis_repository.set_system_notification_settings(settings)
+    await container.services.notification.set_system_settings(settings)
 
     logger.info(
         f"{format_log_user(user)} Change notification type: "

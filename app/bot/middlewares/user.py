@@ -48,7 +48,6 @@ class UserMiddleware(EventTypedMiddleware):
                 name=user.name,
             )
 
-        # TODO: Cache the last 10 users interacted with the bot
-
+        await container.services.user.update_recent_activity(telegram_id=user.telegram_id)
         data[USER_KEY] = user
         return await handler(event, data)
