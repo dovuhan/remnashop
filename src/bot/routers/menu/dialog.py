@@ -198,7 +198,7 @@ invite = Window(
 )
 
 invite_about = Window(
-    Banner(BannerName.MENU),
+    Banner(BannerName.REFERRAL),
     I18nFormat("msg-menu-invite-about"),
     Row(
         SwitchTo(

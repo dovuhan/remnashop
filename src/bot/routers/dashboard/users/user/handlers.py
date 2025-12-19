@@ -1087,11 +1087,6 @@ async def on_subscription_duration_select(
     else:
         remna_user = await remnawave_service.create_user(user=target_user, plan=plan_snapshot)
 
-    subscription_url = remna_user.subscription_url
-
-    if not subscription_url:
-        subscription_url = await remnawave_service.get_subscription_url(remna_user.uuid)  # type: ignore[assignment]
-
     new_subscription = SubscriptionDto(
         user_remna_id=remna_user.uuid,
         status=remna_user.status,
@@ -1102,7 +1097,7 @@ async def on_subscription_duration_select(
         internal_squads=plan.internal_squads,
         external_squad=plan.external_squad,
         expire_at=remna_user.expire_at,
-        url=subscription_url,
+        url=remna_user.subscription_url,
         plan=plan_snapshot,
     )
     await subscription_service.create(target_user, new_subscription)
