@@ -883,7 +883,7 @@ wheels = [
 
 [[package]]
 name = "remnapy"
-version = "2.3.2"
+version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -893,9 +893,9 @@ dependencies = [
     { name = "pydantic-core" },
     { name = "rapid-api-client" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9f/05/c6aa9dae9dee923543b8c61231684a1f203248a11af656ab5b7e184516e8/remnapy-2.3.2.tar.gz", hash = "sha256:c8594d04319dab6c233b3adf241531e4a98c3c9670692bac1e3687e858b0ea7d", size = 124378, upload-time = "2025-12-19T12:40:12.817Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/02/6a85175242e312de064d9ac3255dff46f94c2ba35afe90fdf1b6bd8bfa3f/remnapy-2.3.3.tar.gz", hash = "sha256:e0ce86e32476170ca47933f1c2c7c8b55eef35d80d153774f4e24addf84854af", size = 124384, upload-time = "2025-12-21T12:24:32.197Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/b4/27f09be6d255586062c631fa7e0974955b8520ebe3a7a19d41f566341598/remnapy-2.3.2-py3-none-any.whl", hash = "sha256:ace0a7fce44c9eccca26b1e3e9fe8a5b67d8590e07e4a03cd4bf72416c910432", size = 78561, upload-time = "2025-12-19T12:40:11.466Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/dc/22e9ff49d4fa71275939a6cf65822e96e80c44d1327df7473025e4cfda31/remnapy-2.3.3-py3-none-any.whl", hash = "sha256:a03c44e87cb3330a3dd3123b0a6a85e7f32ceaf9917bd5966f9fa82a228b2ea9", size = 78565, upload-time = "2025-12-21T12:24:30.767Z" },
 ]
 
 [[package]]
@@ -950,7 +950,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "~=2.11.0" },
     { name = "qrcode", extras = ["pil"], specifier = ">=8.2" },
     { name = "redis", specifier = "~=7.0.0" },
-    { name = "remnapy", specifier = ">=2.3.2" },
+    { name = "remnapy", specifier = ">=2.3.3" },
     { name = "sqlalchemy", extras = ["mypy"], specifier = ">=2.0.0" },
     { name = "taskiq", extras = ["orjson"], specifier = "~=0.12.1" },
     { name = "taskiq-redis", specifier = "~=1.2.0" },
