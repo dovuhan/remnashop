@@ -17,10 +17,10 @@ from src.core.config import AppConfig
 from src.core.enums import Currency, TransactionStatus
 from src.infrastructure.database.models.dto import (
     CryptomusGatewaySettingsDto,
+    HeleketGatewaySettingsDto,
     PaymentGatewayDto,
     PaymentResult,
 )
-from src.infrastructure.database.models.dto.payment_gateway import HeleketGatewaySettingsDto
 
 from .base import BasePaymentGateway
 
@@ -138,7 +138,7 @@ class CryptomusGateway(BasePaymentGateway):
         if not sign:
             raise ValueError("Missing signature")
 
-        json_data = json.dumps(data)
+        json_data = json.dumps(data, separators=(",", ":"))
         hash_value = self._generate_signature(json_data)
 
         if not compare_digest(hash_value, sign):

@@ -189,6 +189,7 @@ async def devices_getter(
 
     formatted_devices = [
         {
+            "short_hwid": device.hwid[:32],
             "hwid": device.hwid,
             "platform": device.platform,
             "device_model": device.device_model,
@@ -196,6 +197,8 @@ async def devices_getter(
         }
         for device in devices
     ]
+
+    dialog_manager.dialog_data["hwid_map"] = formatted_devices
 
     return {
         "current_count": len(devices),

@@ -219,7 +219,16 @@ async def on_device_delete(
     remnawave_service: FromDishka[RemnawaveService],
 ) -> None:
     await sub_manager.load_data()
-    selected_device = sub_manager.item_id
+    selected_short_hwid = sub_manager.item_id
+    hwid_map = sub_manager.dialog_data.get("hwid_map")
+
+    if not hwid_map:
+        raise ValueError(f"Selected '{selected_short_hwid}' HWID, but 'hwid_map' is missing")
+
+    full_hwid = next((d["hwid"] for d in hwid_map if d["short_hwid"] == selected_short_hwid), None)
+
+    if not full_hwid:
+        raise ValueError(f"Full HWID not found for '{selected_short_hwid}'")
 
     user: UserDto = sub_manager.middleware_data[USER_KEY]
     target_telegram_id = sub_manager.dialog_data["target_telegram_id"]
@@ -228,8 +237,8 @@ async def on_device_delete(
     if not target_user:
         raise ValueError(f"User '{target_telegram_id}' not found")
 
-    devices = await remnawave_service.delete_device(user=target_user, hwid=selected_device)
-    logger.info(f"{log(user)} Deleted device '{selected_device}' for user '{target_telegram_id}'")
+    devices = await remnawave_service.delete_device(user=target_user, hwid=full_hwid)
+    logger.info(f"{log(user)} Deleted device '{full_hwid}' for user '{target_telegram_id}'")
 
     if devices:
         return

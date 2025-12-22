@@ -184,7 +184,7 @@
     ```
 
 > [!WARNING]
-> **The latest version of the bot is compatible only with RemnaWave panel version 2.3.\***  
+> **The latest version of the bot is compatible only with RemnaWave panel version 2.3–2.4.x**  
 > Before installation, make sure your panel matches this version.
 
 

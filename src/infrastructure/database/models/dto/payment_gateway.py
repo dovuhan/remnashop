@@ -23,6 +23,13 @@ class PaymentGatewayDto(TrackableDto):
     is_active: bool
     settings: Optional["AnyGatewaySettingsDto"] = None
 
+    @property
+    def requires_webhook(self) -> bool:
+        return self.type not in {
+            PaymentGatewayType.CRYPTOMUS,
+            PaymentGatewayType.HELEKET,
+        }
+
 
 class GatewaySettingsDto(TrackableDto):
     model_config = ConfigDict(validate_assignment=True)

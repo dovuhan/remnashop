@@ -3,6 +3,7 @@ import uuid
 from typing import Any, Optional, Union, cast
 
 from aiogram import Bot
+from aiogram.exceptions import TelegramForbiddenError
 from aiogram.types import (
     BufferedInputFile,
     InlineKeyboardButton,
@@ -151,15 +152,14 @@ class NotificationService(BaseService):
     #
 
     async def _send_message(self, user: BaseUserDto, payload: MessagePayload) -> Optional[Message]:
+        reply_markup = self._prepare_reply_markup(
+            payload.reply_markup,
+            payload.add_close_button,
+            payload.auto_delete_after,
+            user.language,
+            user.telegram_id,
+        )
         try:
-            reply_markup = self._prepare_reply_markup(
-                payload.reply_markup,
-                payload.add_close_button,
-                payload.auto_delete_after,
-                user.language,
-                user.telegram_id,
-            )
-
             if (payload.media or payload.media_id) and payload.media_type:
                 sent_message = await self._send_media_message(user, payload, reply_markup)
             else:
@@ -181,11 +181,10 @@ class NotificationService(BaseService):
 
             return sent_message
 
-        except Exception as exception:
-            logger.error(
+        except TelegramForbiddenError as exception:
+            logger.exception(
                 f"Failed to send notification '{payload.i18n_key}' "
-                f"to '{user.telegram_id}': {exception}",
-                exc_info=True,
+                f"to '{user.telegram_id}': {exception}"
             )
             return None
 

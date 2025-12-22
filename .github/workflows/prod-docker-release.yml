@@ -55,7 +55,7 @@ jobs:
             ghcr.io/snoups/remnashop:${{ github.ref_name }}
           build-args: |
             BUILD_TIME=${{ steps.vars.outputs.build_time }}
-            BUILD_BRANCH=${{ github.ref_name }}
+            BUILD_BRANCH=main
             BUILD_COMMIT=${{ steps.vars.outputs.short_sha }}
             BUILD_TAG=${{ github.ref_name }}
 

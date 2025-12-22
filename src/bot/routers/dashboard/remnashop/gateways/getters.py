@@ -55,6 +55,7 @@ async def gateway_getter(
         "is_active": gateway.is_active,
         "settings": gateway.settings.get_settings_as_list_data,
         "webhook": config.get_webhook(gateway.type),
+        "requires_webhook": gateway.requires_webhook,
     }
 
 

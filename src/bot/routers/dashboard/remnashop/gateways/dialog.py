@@ -108,6 +108,7 @@ gateway_settings = Window(
             text=I18nFormat("btn-gateways-webhook-copy"),
             copy_text=Format("{webhook}"),
         ),
+        when=F["requires_webhook"],
     ),
     Row(
         SwitchTo(
