@@ -53,18 +53,16 @@ class UserMiddleware(EventTypedMiddleware):
         referral_service: ReferralService = await container.get(ReferralService)
         notification_service: NotificationService = await container.get(NotificationService)
 
-        # 1) /start spam kontrolünü EN BAŞTA yap (user var/yok fark etmesin)
         is_start = self._is_start_command(event)
         start_is_spam = False
         if is_start:
-            start_is_spam = await self._is_start_spam(redis_repository)
+            start_is_spam = await self._is_start_spam(redis_repository, aiogram_user.id)
 
         user: Optional[UserDto] = await user_service.get(telegram_id=aiogram_user.id)
 
         if user is None:
             user = await user_service.create(aiogram_user)
 
-            # Referrer bilgisi (bildirim metasında kullanılıyor)
             referrer = await referral_service.get_referrer_by_event(event, user.telegram_id)
 
             base_i18n_kwargs = {
@@ -83,11 +81,7 @@ class UserMiddleware(EventTypedMiddleware):
             else:
                 referrer_i18n_kwargs = {"has_referrer": False}
 
-            # 2) Admin bildirimi: /start spam varsa SUSTUR
-            #    - Bot çalışmaya devam eder (user create / referral / handler devam)
-            should_notify_admin = True
-            if is_start and start_is_spam:
-                should_notify_admin = False
+            should_notify_admin = not (is_start and start_is_spam)
 
             if should_notify_admin:
                 await notification_service.system_notify(
@@ -101,10 +95,9 @@ class UserMiddleware(EventTypedMiddleware):
             else:
                 logger.warning(
                     "Start spam protection enabled: skipping admin notification "
-                    f"(window={self._START_SPAM_WINDOW_SECONDS}s, threshold={self._START_SPAM_THRESHOLD})"
+                    f"(window={self._START_SPAM_WINDOW_SECONDS}s, threshold={self._START_SPAM_THRESHOLD}, user_id={aiogram_user.id})"
                 )
 
-            # 3) Referral işlemi: spam olsa bile işleyebilir (isteğe göre burayı da susturabiliriz)
             if await referral_service.is_referral_event(event, user.telegram_id):
                 referral_code = await referral_service.get_ref_code_by_event(event)
                 logger.info(f"Registered with referral code: '{referral_code}'")
@@ -124,26 +117,31 @@ class UserMiddleware(EventTypedMiddleware):
     def _is_start_command(event: TelegramObject) -> bool:
         if not isinstance(event, Message) or not event.text:
             return False
-        command = event.text.split(maxsplit=1)[0].lower()
-        return command.startswith("/start")
+        cmd = event.text.split(maxsplit=1)[0].lower()
+        return cmd == "/start" or cmd.startswith("/start@")
 
-    async def _is_start_spam(self, redis_repository: RedisRepository) -> bool:
-        """
-        Global /start flood guard:
-        - 10 saniyelik pencere içinde 5+ /start => spam
-        - Ama sadece admin notification susar, bot çalışır
-        """
-        key = StartSpamGuardKey().pack()
-        count = await redis_repository.client.incr(key)
+    async def _is_start_spam(self, redis_repository: RedisRepository, user_id: int) -> bool:
+        base_key = StartSpamGuardKey().pack()
+        key = f"{base_key}:{user_id}"
 
-        if count == 1:
-            await redis_repository.client.expire(key, self._START_SPAM_WINDOW_SECONDS)
+        try:
+            count = await redis_repository.client.incr(key)
 
-        # İsteğe bağlı: eşik ilk aşıldığında bir kez logla (log spam azaltır)
-        if count == self._START_SPAM_THRESHOLD:
-            logger.warning(
-                "Start spam threshold reached, admin notifications will be suppressed "
-                f"for ~{self._START_SPAM_WINDOW_SECONDS}s"
-            )
+            if count == 1:
+                await redis_repository.client.expire(key, self._START_SPAM_WINDOW_SECONDS)
+            else:
+                ttl = await redis_repository.client.ttl(key)
+                if ttl == -1:
+                    await redis_repository.client.expire(key, self._START_SPAM_WINDOW_SECONDS)
 
-        return count >= self._START_SPAM_THRESHOLD
+            if count == self._START_SPAM_THRESHOLD:
+                logger.warning(
+                    "Start spam threshold reached, admin notifications will be suppressed "
+                    f"for ~{self._START_SPAM_WINDOW_SECONDS}s (user_id={user_id})"
+                )
+
+            return count >= self._START_SPAM_THRESHOLD
+
+        except Exception:
+            logger.exception("Start spam guard failed (redis issue). Proceeding without suppression.")
+            return False
